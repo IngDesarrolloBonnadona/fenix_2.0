@@ -1,0 +1,164 @@
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { Not, Repository } from 'typeorm';
+
+import { CreateServiceDto } from '../dto/create-service.dto';
+import { UpdateServiceDto } from '../dto/update-service.dto';
+
+import { Service } from '../entities/service.entity';
+
+import { UnitService } from 'src/unit/services/unit.service';
+
+@Injectable()
+export class ServiceService {
+  constructor(
+    @InjectRepository(Service)
+    private readonly serviceRepository: Repository<Service>,
+
+    private readonly unitService: UnitService,
+  ) {}
+
+  async createService(createServiceDto: CreateServiceDto) {
+    if (
+      !createServiceDto ||
+      !createServiceDto.serv_name ||
+      !createServiceDto.serv_unit_id_fk
+    ) {
+      throw new HttpException(
+        'Algunos datos del servicio son requeridos.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const FindService = await this.serviceRepository.findOne({
+      where: {
+        serv_name: createServiceDto.serv_name,
+        serv_unit_id_fk: createServiceDto.serv_unit_id_fk,
+        serv_status: true,
+      },
+    });
+
+    if (FindService) {
+      throw new HttpException(
+        'El servicio ya existe con la unidad seleccionada.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    await this.unitService.findOneUnit(createServiceDto.serv_unit_id_fk);
+
+    const service = this.serviceRepository.create(createServiceDto);
+    await this.serviceRepository.save(service);
+
+    return new HttpException(
+      `¡El servicio ${service.serv_name} se creó correctamente!`,
+      HttpStatus.CREATED,
+    );
+  }
+
+  async findAllServices() {
+    const services = await this.serviceRepository.find({
+      where: {
+        serv_status: true,
+      },
+      relations: {
+        unit: true,
+      },
+      order: {
+        serv_name: 'ASC',
+      },
+    });
+
+    if (services.length === 0) {
+      throw new HttpException(
+        'No se encontró la lista de servicios',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return services;
+  }
+
+  async findOneService(id: number) {
+    if (!id) {
+      throw new HttpException(
+        'El identificador del servicio es requerido.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const service = await this.serviceRepository.findOne({
+      where: { id, serv_status: true },
+      relations: {
+        unit: true,
+      },
+    });
+
+    if (!service) {
+      throw new HttpException(
+        'No se encontró el servicio',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return service;
+  }
+
+  async updateService(id: number, updateServiceDto: UpdateServiceDto) {
+    if (!updateServiceDto) {
+      throw new HttpException(
+        'Los datos para actualizar el servicio son requeridos.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const FindService = await this.serviceRepository.findOne({
+      where: {
+        serv_name: updateServiceDto.serv_name,
+        serv_unit_id_fk: updateServiceDto.serv_unit_id_fk,
+        serv_status: true,
+      },
+    });
+
+    if (FindService) {
+      throw new HttpException(
+        'El servicio ya existe con la unidad seleccionada.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    const result = await this.serviceRepository.update(id, updateServiceDto);
+
+    if (result.affected === 0) {
+      throw new HttpException(
+        `No se pudo actualizar el servicio`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return new HttpException(
+      `¡Datos actualizados correctamente!`,
+      HttpStatus.OK,
+    );
+  }
+
+  async deleteService(id: number) {
+    const serviceFound = await this.serviceRepository.findOneBy({ id });
+
+    if (!serviceFound) {
+      throw new HttpException(
+        `Servicio no encontrado, favor recargar.`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const result = await this.serviceRepository.softDelete(id);
+
+    if (result.affected === 0) {
+      throw new HttpException(
+        `No se pudo eliminar el servicio.`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return new HttpException(`¡Datos eliminados correctamente!`, HttpStatus.OK);
+  }
+}

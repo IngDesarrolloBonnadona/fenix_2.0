@@ -1,0 +1,31 @@
+interface VascularAccessResearchInstrument {
+  id: string;
+  inst_clinical_research_id: string;
+  inst_has_failure: boolean;
+  inst_damage: boolean;
+  inst_clinical_context: string;
+  inst_other_device_type: string;
+  inst_other_damage_type: string;
+  inst_fluid_name: string;
+  inst_is_phlebitis_fluid: boolean;
+  inst_fluid_ph: number;
+  inst_adequate_infusion_time: boolean;
+  inst_infusion_time: string;
+  inst_adequate_dilution: boolean;
+  inst_fluid_dilution: string;
+  inst_other_influencing_factors: string;
+  inst_other_failed_measures: string;
+  inst_other_risk_factors: string;
+  inst_venipuncture_technique: string;
+  inst_additional_findings: string;
+  inst_has_care_failures: boolean;
+  inst_has_incorrect_actions: boolean;
+  inst_has_unsafe_actions: boolean;
+  inst_conclusions: string;
+  inst_is_case_preventable: boolean;
+  inst_status: boolean;
+  createdAt: string;
+  updateAt: string;
+  deletedAt: string | null;
+  optionResearchCategory?: OptionResearchCategory[];
+}

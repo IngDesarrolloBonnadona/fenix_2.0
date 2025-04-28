@@ -1,0 +1,4 @@
+export enum OriginsEnum {
+  INTERNAL_SOURCE = "FUENTE INTERNA",
+  EXTERNAL_SOURCE = "FUENTE EXTERNA",
+}

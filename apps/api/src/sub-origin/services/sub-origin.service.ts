@@ -1,0 +1,202 @@
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { Not, Repository } from 'typeorm';
+
+import { CreateSubOriginDto } from '../dto/create-sub-origin.dto';
+import { UpdateSubOriginDto } from '../dto/update-sub-origin.dto';
+
+import { SubOrigin } from '../entities/sub-origin.entity';
+import { OriginService } from 'src/origin/services/origin.service';
+
+@Injectable()
+export class SubOriginService {
+  constructor(
+    @InjectRepository(SubOrigin)
+    private readonly subOriginRepository: Repository<SubOrigin>,
+
+    private readonly originService: OriginService,
+  ) {}
+
+  async createSubOrigin(createSubOriginDto: CreateSubOriginDto) {
+    if (
+      !createSubOriginDto ||
+      !createSubOriginDto.sub_o_name ||
+      !createSubOriginDto.sub_o_origin_id_fk
+    ) {
+      throw new HttpException(
+        'Algunos datos de sub origen son requeridos.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const FindSubOrigin = await this.subOriginRepository.findOne({
+      where: {
+        sub_o_name: createSubOriginDto.sub_o_name,
+        sub_o_origin_id_fk: createSubOriginDto.sub_o_origin_id_fk,
+        sub_o_status: true,
+      },
+    });
+
+    if (FindSubOrigin) {
+      throw new HttpException(
+        'El sub origen ya existe con el origen seleccionado.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    const subOrigin = this.subOriginRepository.create(createSubOriginDto);
+    await this.subOriginRepository.save(subOrigin);
+
+    return new HttpException(
+      `¡El sub origen ${subOrigin.sub_o_name} se creó correctamente!`,
+      HttpStatus.CREATED,
+    );
+  }
+
+  async findAllSubOrigins() {
+    const subOrigins = await this.subOriginRepository.find({
+      where: {
+        sub_o_status: true,
+      },
+      relations: {
+        origin: true,
+      },
+      order: {
+        sub_o_name: 'ASC',
+      },
+    });
+
+    if (subOrigins.length === 0) {
+      throw new HttpException(
+        'No se encontró la lista de sub origenes.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return subOrigins;
+  }
+
+  async findOneSubOrigin(id: number) {
+    if (!id) {
+      throw new HttpException(
+        'El identificador del sub origen es requerido.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const subOrigin = await this.subOriginRepository.findOne({
+      where: { id, sub_o_status: true },
+      relations: {
+        origin: true,
+      },
+    });
+
+    if (!subOrigin) {
+      throw new HttpException(
+        'No se encontró el sub origen.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return subOrigin;
+  }
+
+  async findSubOriginByOriginId(originId: number) {
+    if (!originId) {
+      throw new HttpException(
+        'El identificador del origen es requerido.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const subOriginByOrigin = await this.subOriginRepository.find({
+      where: {
+        sub_o_origin_id_fk: originId,
+        sub_o_status: true,
+      },
+      order: {
+        sub_o_name: 'ASC',
+      },
+    });
+
+    if (!subOriginByOrigin) {
+      throw new HttpException(
+        'No se encontró el sub origen relacionado al origen.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return subOriginByOrigin;
+  }
+
+  async updateSubOrigin(id: number, updateSubOriginDto: UpdateSubOriginDto) {
+    if (!updateSubOriginDto) {
+      throw new HttpException(
+        'Los datos para actualizar el sub origen son requeridos.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.findOneSubOrigin(id);
+    await this.originService.findOneOrigin(
+      updateSubOriginDto.sub_o_origin_id_fk,
+    );
+
+    if (updateSubOriginDto.sub_o_name) {
+      const duplicateName = await this.subOriginRepository.findOne({
+        where: {
+          id: Not(id),
+          sub_o_name: updateSubOriginDto.sub_o_name,
+          sub_o_origin_id_fk: updateSubOriginDto.sub_o_origin_id_fk,
+          sub_o_status: true,
+        },
+      });
+
+      if (duplicateName) {
+        throw new HttpException(
+          `El nombre del sub origen ya existe con este origen.`,
+          HttpStatus.CONFLICT,
+        );
+      }
+    }
+
+    const result = await this.subOriginRepository.update(
+      id,
+      updateSubOriginDto,
+    );
+
+    if (result.affected === 0) {
+      throw new HttpException(
+        `No se pudo actualizar el sub origen.`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return new HttpException(
+      `¡Datos actualizados correctamente!`,
+      HttpStatus.OK,
+    );
+  }
+
+  async deleteSubOrigin(id: number) {
+    const subOriginFound = await this.subOriginRepository.findOneBy({ id });
+
+    if (!subOriginFound) {
+      throw new HttpException(
+        `Sub origen no encontrado, favor recargar.`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const result = await this.subOriginRepository.softDelete(id);
+
+    if (result.affected === 0) {
+      throw new HttpException(
+        `No se pudo eliminar el sub origen.`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return new HttpException(`¡Datos eliminados correctamente!`, HttpStatus.OK);
+  }
+}
