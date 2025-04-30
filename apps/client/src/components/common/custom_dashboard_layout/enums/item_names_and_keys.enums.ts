@@ -2,7 +2,7 @@ export enum ItemNames {
   ITEM_DASHBOARD = "Estadisticas",
   ITEM_NOTIFICATIONS = "Notificaciones",
   ITEM_CREATE_REPORT = "Reportar caso",
-  ITEM_SUMMARY = "Resumen",
+  ITEM_SUMMARY = "Resumen de casos",
   ITEM_SYNERGY = "Sinergia",
 
   ITEM_VALIDATION = "Validación",
@@ -22,7 +22,7 @@ export enum ItemNames {
 
   ITEM_RISK = "Riesgo",
   SUB_RISK_ANALYSIS = "Análisis de riesgo",
-  SUB_RISK_SUMMARY = "Resumen",
+  SUB_RISK_SUMMARY = "Resumen de riesgo",
   SUB_RISK_INFORMATION = "Informe estadístico",
 
   ITEM_SP_PROGRAM = "Programa de SP",
