@@ -42,7 +42,7 @@ const OptionsAnalysisMyCasesAssignmentReviewButton: React.FC<{
               SeverityClasificationEnum.SERIOUS_SEVERITY)
         ) && (
           <>
-            <CustomButton
+            {/* <CustomButton
               idCustomButton="cancel-case-button"
               typeCustomButton="primary"
               sizeCustomButton="small"
@@ -56,7 +56,7 @@ const OptionsAnalysisMyCasesAssignmentReviewButton: React.FC<{
                 fontSize: "12px",
                 borderRadius: "16px",
               }}
-            />
+            /> */}
 
             <div className="return-case-button">
               <CustomButton
