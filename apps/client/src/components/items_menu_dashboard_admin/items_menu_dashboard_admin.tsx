@@ -71,7 +71,7 @@ export const useMenuItems = () => {
 
   const summaryModule = usePermissionsAppAndModuleValidationInPage({
     allowedApplications: [ApplicationsEnum.FÉNIX],
-    allowedModules: [ApplicationModulesEnum.FENIX_SUMMARY],
+    allowedModules: [ApplicationModulesEnum.FENIX_SUMMARY_REPORT],
     shouldRedirectOnError: false,
   });
 

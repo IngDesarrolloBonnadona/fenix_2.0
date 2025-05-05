@@ -32,7 +32,7 @@ const SummaryReportReviewPage = () => {
 
   usePermissionsAppAndModuleValidationInPage({
     allowedApplications: [ApplicationsEnum.FÉNIX],
-    allowedModules: [ApplicationModulesEnum.FENIX_SUMMARY],
+    allowedModules: [ApplicationModulesEnum.FENIX_SUMMARY_REPORT],
   });
 
   const idNumberUserSessionState = useAppSelector(

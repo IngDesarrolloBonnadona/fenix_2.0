@@ -80,7 +80,7 @@ const StatisticsContent: React.FC = () => {
                   fontSize: "16px",
                 }}
               >
-                Recepción de los casos según los últimos 6 meses
+                Recepción de los casos según los últimos {sixMonthsAgo} meses
               </h3>
               <Space>
                 <CustomButton
