@@ -72,12 +72,12 @@ require('dotenv').config();
       password: process.env.TYPEORM_PASSWORD,
       database: process.env.TYPEORM_DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false,
+      synchronize: true,
       autoLoadEntities: true,
-      ssl: {
-        requestCert: true,
-        rejectUnauthorized: false,
-      },
+      // ssl: {
+      //   requestCert: true,
+      //   rejectUnauthorized: false,
+      // },
     }),
     CaseReportOriginalModule,
     CaseTypeModule,
