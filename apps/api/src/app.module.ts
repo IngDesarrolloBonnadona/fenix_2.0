@@ -72,7 +72,7 @@ require('dotenv').config();
       password: process.env.TYPEORM_PASSWORD,
       database: process.env.TYPEORM_DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+      synchronize: false,
       autoLoadEntities: true,
       // ssl: {
       //   requestCert: true,
